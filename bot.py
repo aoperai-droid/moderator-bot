@@ -31,7 +31,7 @@ VERIFICATION_ATTEMPTS = 3
 MESSAGE_DELETE_SECONDS = 30
 
 # ============================================================
-# 25 РАЗНЫХ ПРИМЕРОВ
+# 25 РАЗНЫХ ПРИМЕРОВ ДЛЯ ВЕРИФИКАЦИИ
 # ============================================================
 VERIFICATION_QUESTIONS = [
     {"question": "Сколько будет 7 + 3?", "answer": 10},
@@ -65,27 +65,29 @@ VERIFICATION_QUESTIONS = [
 # ТЕКСТ ПРИВЕТСТВИЯ
 # ============================================================
 WELCOME_MESSAGE_TEMPLATE = """
-{stars} Добро пожаловать в Вейп-Барахолку Краснодара, {user_mention}! 
+🌟 Добро пожаловать в Вейп-Барахолку Краснодара, {user_mention}! 🎉
 
-Запрещено:
-- Не вейп-тематика
-- Оскорбления и флуд
-- Спам и реклама
+📋 <b>Правила чата:</b>
+🚫 Запрещено:
+• ❌ Не вейп-тематика
+• ❌ Оскорбления и флуд
+• ❌ Спам и реклама
 
+⚠️ <b>Внимание!</b>
 При скаме: @callumom 
 Администрация не отвечает за сделки.
 
-Лучшие вейп-шопы:
-- Mix Vape: https://t.me/mixvape1
-- Vape Shop: https://t.me/vapeshop
+🏪 <b>Лучшие вейп-шопы:</b>
+• 🔥 Mix Vape: https://t.me/mixvape1
+• 💨 Vape Shop: https://t.me/vapeshop
 
-Приятного общения! 
+💫 Приятного общения!
 """
 
 WELCOME_STARS = ["✨", "🌟", "⭐", "💫", "🔥", "❤️"]
 
 # ============================================================
-# ЗАПРЕЩЁННЫЕ СЛОВА
+# ЗАПРЕЩЁННЫЕ СЛОВА (ПОЛНЫЙ СПИСОК)
 # ============================================================
 FORBIDDEN_WORDS = [
     "подработка", "заработок", "заработать", "заработнаяплата",
@@ -97,7 +99,20 @@ FORBIDDEN_WORDS = [
     "ищуассистента", "требуютсясотрудники", "требуетсясотрудник",
     "набираемсотрудников", "наборсотрудников", "открытавакансия",
     "приглашаювкоманду", "ищемлюдей", "ищемсотрудников", "ищемработников",
-    "вакансияоткрыта", "заработнаяплатавысокая",
+    "вакансияоткрыта", "заработнаяплатавысокая", "отдатьбесплатно",
+    "отдамбесплатно", "отдатьбесплатнозарефку", "реф", "рефка", "альфа",
+    "дельце", "трудоустройство", "кешвышеобычного", "обучениенаместе",
+    "ищутолковыхребят", "пкклуб", "пацаныотлет", "пацаныотл",
+    "оплатасразу", "работанесложная", "новичковберём", "выплатимчестно",
+    "требуетсяпомощь", "естьтемазароботка", "еслиинтерестнопиши",
+    "зарефкуальфы", "прибыльнаяшабашка", "можносовмещатьсучебой",
+    "скупаюголду", "хорошемукурсу", "беруваренду", "дамподработку",
+    "бросаюкурить", "плачуот", "вкомпьютерныйклуб", "быстрыеденьги",
+    "легкийкуш", "арендасим", "куплюакк", "арендааккаунта",
+    "арбитраж", "биржа", "быстрыйвыхлоп", "доходность", "крипта",
+    "пассивныйзаработок", "ищемпарней", "ищемчеловека",
+    "винтернетмагазин", "ищемребят", "возьмуваренду",
+    "скуплюпушкинскиекарты", "баллыпушкинскойкарты"
 ]
 
 # ============================================================
@@ -197,6 +212,23 @@ def send_and_delete(chat_id, text, delay=MESSAGE_DELETE_SECONDS, **kwargs):
     return sent
 
 # ============================================================
+# КЛАВИАТУРЫ
+# ============================================================
+def admin_keyboard():
+    """Клавиатура для админов"""
+    keyboard = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
+    buttons = [
+        types.KeyboardButton("📊 Статистика"),
+        types.KeyboardButton("📝 Список слов"),
+        types.KeyboardButton("👥 Админы"),
+        types.KeyboardButton("🔐 Верификация"),
+        types.KeyboardButton("📋 Помощь"),
+        types.KeyboardButton("ℹ️ Статус")
+    ]
+    keyboard.add(*buttons)
+    return keyboard
+
+# ============================================================
 # ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
 # ============================================================
 def is_verified(user_id, chat_id):
@@ -258,17 +290,19 @@ def send_verification(chat_id, user_id, user_name, first_name, is_rejoin=False):
     try:
         q = get_question()
         mention = f"@{user_name}" if user_name else first_name
-        title = "Повторная верификация" if is_rejoin else "Верификация нового пользователя"
+        title = "🔄 Повторная верификация" if is_rejoin else "🔐 Верификация нового пользователя"
         
         text = f"""{title}
 
 👤 {mention}
 
-Для подтверждения, что вы не робот, решите пример:
+🧮 Для подтверждения, что вы не робот, решите пример:
 
-{q['question']}
+<b>❓ {q['question']}</b>
 
-У вас {VERIFICATION_TIMEOUT//60} минут(ы) и {VERIFICATION_ATTEMPTS} попытки."""
+⏳ У вас {VERIFICATION_TIMEOUT//60} минут(ы) и {VERIFICATION_ATTEMPTS} попытки.
+
+💡 Напишите ответ в чат (только число)"""
         
         verification_data[user_id] = {
             'chat_id': chat_id,
@@ -286,17 +320,23 @@ def send_verification(chat_id, user_id, user_name, first_name, is_rejoin=False):
         if not is_rejoin:
             update_stats(user_id, chat_id, 'joins')
         
-        admin_text = f"""{title}
-ID: {user_id}
-Имя: {first_name}
-Юзернейм: @{user_name if user_name else "отсутствует"}
-Чат: {chat_id}
-Вопрос: {q['question']}
-Время: {datetime.now().strftime("%H:%M:%S")}"""
+        admin_text = f"""👤 {title}
+├ 🆔 ID: {user_id}
+├ 📛 Имя: {first_name}
+├ 🔗 Юзернейм: @{user_name if user_name else "отсутствует"}
+├ 💬 Чат: {chat_id}
+├ ❓ Вопрос: {q['question']}
+└ 🕐 Время: {datetime.now().strftime("%H:%M:%S")}"""
         send_msg(ADMIN_ID, admin_text)
         
         try:
-            send_msg(user_id, f"В группе задан вопрос для верификации:\n\n{q['question']}\n\nУ вас {VERIFICATION_TIMEOUT//60} минут(ы)")
+            send_msg(user_id, f"""🔐 В группе задан вопрос для верификации:
+
+❓ {q['question']}
+
+⏳ У вас {VERIFICATION_TIMEOUT//60} минут(ы)
+
+📝 Напишите ответ в чат!""")
         except:
             pass
         
@@ -314,28 +354,28 @@ def send_welcome(chat_id, user_id, user_name, first_name):
         send_and_delete(chat_id, text, delay=MESSAGE_DELETE_SECONDS)
         update_stats(user_id, chat_id, 'verifications')
         mark_verified(user_id, chat_id)
-        send_msg(ADMIN_ID, f"Пользователь {user_id} верифицирован в чате {chat_id}")
+        send_msg(ADMIN_ID, f"✅ Пользователь {user_id} успешно верифицирован в чате {chat_id}")
     except Exception as e:
         logger.error(f"Ошибка приветствия: {e}")
 
 def verify_user(chat_id, user_id, message_id, answer_text):
     if user_id not in verification_data:
-        return False, "Не на верификации"
+        return False, "❌ Вы не на верификации"
     
     data = verification_data[user_id]
     
     if time.time() - data['timestamp'] > VERIFICATION_TIMEOUT:
         del verification_data[user_id]
-        return False, "Время истекло"
+        return False, "⏰ Время верификации истекло"
     
     if data['attempts'] >= VERIFICATION_ATTEMPTS:
         del verification_data[user_id]
-        return False, "Попытки исчерпаны"
+        return False, "❌ Попытки исчерпаны"
     
     try:
         user_answer = int(answer_text.strip())
     except ValueError:
-        return False, "Введите число"
+        return False, "⚠️ Пожалуйста, введите число"
     
     delete_msg(chat_id, message_id)
     
@@ -344,17 +384,17 @@ def verify_user(chat_id, user_id, message_id, answer_text):
             delete_msg(chat_id, msg_id)
         del verification_data[user_id]
         
-        send_and_delete(chat_id, "Вы успешно прошли верификацию! Добро пожаловать!", delay=MESSAGE_DELETE_SECONDS)
+        send_and_delete(chat_id, "✅ Вы успешно прошли верификацию! Добро пожаловать! 🎉", delay=MESSAGE_DELETE_SECONDS)
         
         user = safe_api_call(bot.get_chat_member, chat_id, user_id)
         if user:
             send_welcome(chat_id, user_id, user.user.username, user.user.first_name)
-        return True, "Успех!"
+        return True, "✅ Верификация успешна!"
     else:
         data['attempts'] += 1
         remaining = VERIFICATION_ATTEMPTS - data['attempts']
         if remaining > 0:
-            err = send_and_delete(chat_id, f"Неправильно. Осталось: {remaining}", delay=MESSAGE_DELETE_SECONDS)
+            err = send_and_delete(chat_id, f"❌ Неправильно. Осталось попыток: {remaining}", delay=MESSAGE_DELETE_SECONDS)
             if err:
                 data['message_ids'].append(err.message_id)
         else:
@@ -362,34 +402,48 @@ def verify_user(chat_id, user_id, message_id, answer_text):
                 delete_msg(chat_id, msg_id)
             del verification_data[user_id]
             restrict_user(chat_id, user_id)
-        return False, f"Осталось попыток: {remaining}"
+        return False, f"❌ Осталось попыток: {remaining}"
 
 def restrict_user(chat_id, user_id):
+    """Ограничивает пользователя (запрещает отправлять сообщения)"""
     if user_id in verification_data:
         for msg_id in verification_data[user_id]['message_ids']:
             delete_msg(chat_id, msg_id)
         del verification_data[user_id]
     
     try:
-        safe_api_call(bot.restrict_chat_member, chat_id, user_id,
-            can_send_messages=False, can_send_media=False,
-            can_send_other_messages=False, can_add_web_page_previews=False)
+        # Используем ChatPermissions для ограничения
+        permissions = types.ChatPermissions(
+            can_send_messages=False,
+            can_send_media=False,
+            can_send_other_messages=False,
+            can_add_web_page_previews=False,
+            can_send_polls=False,
+            can_change_info=False,
+            can_invite_users=False,
+            can_pin_messages=False
+        )
+        
+        safe_api_call(bot.restrict_chat_member, chat_id, user_id, permissions)
+        
         restricted_users[user_id] = {'chat_id': chat_id, 'timestamp': time.time()}
-        send_and_delete(chat_id, "Пользователь ограничен.", delay=MESSAGE_DELETE_SECONDS)
-        send_msg(ADMIN_ID, f"Пользователь {user_id} ограничен в чате {chat_id}")
+        send_and_delete(chat_id, "⛔ Пользователь не прошел верификацию и ограничен.", delay=MESSAGE_DELETE_SECONDS)
+        send_msg(ADMIN_ID, f"⛔ Пользователь {user_id} ограничен в чате {chat_id}")
+        
     except Exception as e:
         logger.error(f"Ошибка ограничения: {e}")
 
 def send_ban_log(chat_id, user_id, username, first_name, text):
     link = f"@{username}" if username else f"ID: {user_id}"
     now = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
-    log = f"""Забанен спамер
-Время: {now}
-ID: {user_id}
-Имя: {first_name or "Без имени"}
-Ссылка: {link}
-Чат: {chat_id}
-Текст: {text}"""
+    log = f"""🚫 <b>Забанен спамер!</b>
+
+🆔 ID: {user_id}
+📛 Имя: {first_name or "Без имени"}
+🔗 Ссылка: {link}
+💬 Чат: {chat_id}
+📝 Текст: {text}
+🕐 Время: {now}"""
     send_msg(ADMIN_ID, log)
 
 # ============================================================
@@ -427,7 +481,7 @@ def group_message_handler(message):
     
     if user_id in restricted_users:
         delete_msg(chat_id, message.message_id)
-        send_and_delete(chat_id, f"{message.from_user.first_name}, вы ограничены.", delay=MESSAGE_DELETE_SECONDS)
+        send_and_delete(chat_id, f"⛔ {message.from_user.first_name}, вы ограничены. Обратитесь к администратору.", delay=MESSAGE_DELETE_SECONDS)
         return
     
     if not is_verified(user_id, chat_id):
@@ -447,53 +501,162 @@ def group_message_handler(message):
 # ============================================================
 @bot.message_handler(commands=['start'], chat_types=['private'])
 def start_cmd(message):
-    if message.from_user.id in authorized_users:
-        send_msg(message.from_user.id, """Авторизован!
+    user_id = message.from_user.id
+    
+    if user_id in authorized_users:
+        welcome_text = """🌟 <b>Добро пожаловать в админ-панель!</b>
 
-Команды:
-/verify - для себя
-/verify_user <id> - для другого
-/verify_manual <id> - ручная
+👋 Привет, администратор! Я готов к работе.
+
+📋 <b>Доступные команды:</b>
+
+🔐 <b>Верификация:</b>
+/verify - начать верификацию для себя
+/verify_user <id> - верификация пользователя
+/verify_manual <id> - ручная верификация
 /unrestrict <id> - снять ограничение
+
+📊 <b>Статистика:</b>
 /stats - статистика чата
-/stats_all - все чаты
-/status - статус
-/help - помощь""")
+/stats_all - статистика всех чатов
+/send_stats - отправить дневную статистику
+/status - статус бота
+
+👥 <b>Управление:</b>
+/add_admin <пароль> <id> - добавить админа
+/remove_admin <id> - удалить админа
+/list_admins - список админов
+
+📝 <b>Фильтр слов:</b>
+/add_word <слово> - добавить слово
+/remove_word <слово> - удалить слово
+/list_words - список слов
+
+⚙️ <b>Настройки:</b>
+/set_delete_time <сек> - время удаления сообщений
+
+💡 <b>Совет:</b> Используйте кнопки ниже для быстрого доступа!"""
+        
+        send_msg(user_id, welcome_text, reply_markup=admin_keyboard())
     else:
-        send_msg(message.from_user.id, "Введите пароль:")
+        send_msg(user_id, """🔐 <b>Требуется авторизация</b>
+
+Для доступа к админ-панели введите пароль.
+
+ℹ️ Пароль был установлен при настройке бота.""")
+        send_msg(user_id, "🔑 Введите пароль:")
 
 @bot.message_handler(commands=['help'], chat_types=['private'])
 def help_cmd(message):
     if message.from_user.id not in authorized_users:
         return
-    send_msg(message.from_user.id, """Помощь:
-/verify - начать верификацию
+    
+    help_text = """📋 <b>Помощь по командам</b>
+
+🔐 <b>Верификация:</b>
+/verify - начать верификацию для себя
 /verify_user <id> - верификация пользователя
 /verify_manual <id> - ручная верификация
 /unrestrict <id> - снять ограничение
+
+📊 <b>Статистика:</b>
 /stats - статистика чата
-/stats_all - все чаты
+/stats_all - статистика всех чатов
+/send_stats - отправить дневную статистику
 /status - статус бота
+
+👥 <b>Управление:</b>
 /add_admin <пароль> <id> - добавить админа
 /remove_admin <id> - удалить админа
 /list_admins - список админов
+
+📝 <b>Фильтр слов:</b>
 /add_word <слово> - добавить слово
 /remove_word <слово> - удалить слово
 /list_words - список слов
-/set_delete_time <сек> - время удаления""")
+
+⚙️ <b>Настройки:</b>
+/set_delete_time <сек> - время удаления
+
+❓ <b>Вопросы?</b> Обратитесь к главному администратору."""
+    
+    send_msg(message.from_user.id, help_text, reply_markup=admin_keyboard())
+
+# ============================================================
+# ОБРАБОТЧИК КНОПОК
+# ============================================================
+@bot.message_handler(func=lambda message: message.text in ["📊 Статистика", "📝 Список слов", "👥 Админы", "🔐 Верификация", "📋 Помощь", "ℹ️ Статус"])
+def button_handler(message):
+    user_id = message.from_user.id
+    
+    if user_id not in authorized_users:
+        send_msg(user_id, "⛔ Доступ запрещен. Только для администраторов.")
+        return
+    
+    if message.text == "📊 Статистика":
+        stats_cmd(message)
+    elif message.text == "📝 Список слов":
+        list_words_cmd(message)
+    elif message.text == "👥 Админы":
+        list_admins_cmd(message)
+    elif message.text == "🔐 Верификация":
+        send_msg(user_id, """🔐 <b>Управление верификацией</b>
+
+📋 Доступные команды:
+/verify - пройти верификацию
+/verify_user <id> - верифицировать пользователя
+/verify_manual <id> - ручная верификация
+/unrestrict <id> - снять ограничение""")
+    elif message.text == "📋 Помощь":
+        help_cmd(message)
+    elif message.text == "ℹ️ Статус":
+        status_cmd(message)
 
 @bot.message_handler(content_types=['text'], chat_types=['private'])
 def private_message_handler(message):
     user_id = message.from_user.id
+    
     if user_id in authorized_users:
-        handle_admin_commands(message)
+        text = message.text.strip()
+        if text.startswith('/'):
+            handle_admin_commands(message)
+        else:
+            if text not in ["📊 Статистика", "📝 Список слов", "👥 Админы", "🔐 Верификация", "📋 Помощь", "ℹ️ Статус"]:
+                send_msg(user_id, "❓ Неизвестная команда. Используйте /help для списка команд.")
     else:
         if message.text.strip() == ADMIN_PASSWORD:
             authorized_users[user_id] = True
-            send_msg(user_id, "Пароль верный!")
+            send_msg(user_id, "✅ <b>Доступ разрешен!</b> Добро пожаловать в админ-панель.", reply_markup=admin_keyboard())
+            start_cmd(message)
         else:
-            send_msg(user_id, "Неверный пароль.")
+            send_msg(user_id, "❌ <b>Неверный пароль!</b> Попробуйте снова.")
 
+# ============================================================
+# КОМАНДЫ ДЛЯ КНОПОК
+# ============================================================
+def list_words_cmd(message):
+    if message.from_user.id not in authorized_users:
+        return
+    word_list = "\n".join([f"• {w}" for w in FORBIDDEN_WORDS])
+    send_msg(message.from_user.id, f"📝 <b>Список запрещенных слов:</b>\n\n{word_list}")
+
+def list_admins_cmd(message):
+    if message.from_user.id not in authorized_users:
+        return
+    admin_list = "\n".join([f"• {u}" for u in authorized_users])
+    send_msg(message.from_user.id, f"👥 <b>Список администраторов:</b>\n\n{admin_list}")
+
+@bot.message_handler(commands=['list_words'])
+def list_words_command(message):
+    list_words_cmd(message)
+
+@bot.message_handler(commands=['list_admins'])
+def list_admins_command(message):
+    list_admins_cmd(message)
+
+# ============================================================
+# ОСТАЛЬНЫЕ КОМАНДЫ
+# ============================================================
 @bot.message_handler(commands=['verify'], chat_types=['group', 'supergroup'])
 def verify_cmd(message):
     if message.from_user.id not in authorized_users:
@@ -502,19 +665,19 @@ def verify_cmd(message):
     chat_id = message.chat.id
     
     if is_verified(user_id, chat_id):
-        send_msg(message.from_user.id, "Вы уже верифицированы")
+        send_msg(message.from_user.id, "✅ Вы уже верифицированы в этом чате")
         return
     if user_id in verification_data:
-        send_msg(message.from_user.id, "Вы уже на верификации")
+        send_msg(message.from_user.id, "⏳ Вы уже на верификации")
         return
     if user_id in restricted_users:
-        send_msg(message.from_user.id, "Вы ограничены")
+        send_msg(message.from_user.id, "⛔ Вы ограничены. Обратитесь к администратору.")
         return
     
     user = safe_api_call(bot.get_chat_member, chat_id, user_id)
     if user:
         send_verification(chat_id, user_id, user.user.username, user.user.first_name, is_rejoin=True)
-        send_msg(message.from_user.id, "Вопрос отправлен в чат!")
+        send_msg(message.from_user.id, "✅ Вопрос для верификации отправлен в чат!")
 
 @bot.message_handler(commands=['verify_user'], chat_types=['group', 'supergroup'])
 def verify_user_cmd(message):
@@ -522,7 +685,7 @@ def verify_user_cmd(message):
         return
     parts = message.text.split()
     if len(parts) != 2:
-        send_msg(message.from_user.id, "/verify_user <id>")
+        send_msg(message.from_user.id, "❌ /verify_user <id>\n\nПример: /verify_user 123456789")
         return
     
     try:
@@ -530,22 +693,22 @@ def verify_user_cmd(message):
         chat_id = message.chat.id
         
         if is_verified(target, chat_id):
-            send_msg(message.from_user.id, f"Пользователь {target} уже верифицирован")
+            send_msg(message.from_user.id, f"✅ Пользователь {target} уже верифицирован")
             return
         if target in verification_data:
-            send_msg(message.from_user.id, f"Пользователь {target} уже на верификации")
+            send_msg(message.from_user.id, f"⏳ Пользователь {target} уже на верификации")
             return
         if target in restricted_users:
-            send_msg(message.from_user.id, f"Пользователь {target} ограничен")
+            send_msg(message.from_user.id, f"⛔ Пользователь {target} ограничен")
             return
         
         user = safe_api_call(bot.get_chat_member, chat_id, target)
         if user:
             send_verification(chat_id, target, user.user.username, user.user.first_name, is_rejoin=True)
-            send_msg(message.from_user.id, f"Вопрос отправлен пользователю {target}")
+            send_msg(message.from_user.id, f"✅ Вопрос отправлен пользователю {target}")
             
     except ValueError:
-        send_msg(message.from_user.id, "Неверный ID")
+        send_msg(message.from_user.id, "❌ Неверный ID")
 
 @bot.message_handler(commands=['verify_manual'])
 def verify_manual_cmd(message):
@@ -553,7 +716,7 @@ def verify_manual_cmd(message):
         return
     parts = message.text.split()
     if len(parts) != 2:
-        send_msg(message.from_user.id, "/verify_manual <id>")
+        send_msg(message.from_user.id, "❌ /verify_manual <id>\n\nПример: /verify_manual 123456789")
         return
     
     try:
@@ -566,9 +729,18 @@ def verify_manual_cmd(message):
             del verification_data[user_id]
         
         if user_id in restricted_users:
-            safe_api_call(bot.restrict_chat_member, chat_id, user_id,
-                can_send_messages=True, can_send_media=True,
-                can_send_other_messages=True, can_add_web_page_previews=True)
+            # Снимаем ограничение
+            permissions = types.ChatPermissions(
+                can_send_messages=True,
+                can_send_media=True,
+                can_send_other_messages=True,
+                can_add_web_page_previews=True,
+                can_send_polls=True,
+                can_change_info=False,
+                can_invite_users=True,
+                can_pin_messages=False
+            )
+            safe_api_call(bot.restrict_chat_member, chat_id, user_id, permissions)
             del restricted_users[user_id]
         
         mark_verified(user_id, chat_id)
@@ -577,11 +749,11 @@ def verify_manual_cmd(message):
         if user:
             send_welcome(chat_id, user_id, user.user.username, user.user.first_name)
         
-        send_and_delete(chat_id, "Пользователь верифицирован администратором!", delay=MESSAGE_DELETE_SECONDS)
-        send_msg(message.from_user.id, f"Пользователь {user_id} верифицирован")
+        send_and_delete(chat_id, "✅ Пользователь верифицирован администратором! Добро пожаловать! 🎉", delay=MESSAGE_DELETE_SECONDS)
+        send_msg(message.from_user.id, f"✅ Пользователь {user_id} верифицирован")
         
     except ValueError:
-        send_msg(message.from_user.id, "Неверный ID")
+        send_msg(message.from_user.id, "❌ Неверный ID")
 
 @bot.message_handler(commands=['unrestrict'])
 def unrestrict_cmd(message):
@@ -589,7 +761,7 @@ def unrestrict_cmd(message):
         return
     parts = message.text.split()
     if len(parts) != 2:
-        send_msg(message.from_user.id, "/unrestrict <id>")
+        send_msg(message.from_user.id, "❌ /unrestrict <id>\n\nПример: /unrestrict 123456789")
         return
     
     try:
@@ -597,18 +769,28 @@ def unrestrict_cmd(message):
         if user_id in restricted_users:
             chat_id = restricted_users[user_id]['chat_id']
             
-            safe_api_call(bot.restrict_chat_member, chat_id, user_id,
-                can_send_messages=True, can_send_media=True,
-                can_send_other_messages=True, can_add_web_page_previews=True)
+            # Снимаем ограничение
+            permissions = types.ChatPermissions(
+                can_send_messages=True,
+                can_send_media=True,
+                can_send_other_messages=True,
+                can_add_web_page_previews=True,
+                can_send_polls=True,
+                can_change_info=False,
+                can_invite_users=True,
+                can_pin_messages=False
+            )
+            
+            safe_api_call(bot.restrict_chat_member, chat_id, user_id, permissions)
             del restricted_users[user_id]
             
-            send_msg(message.from_user.id, f"Ограничение снято с {user_id}")
-            send_and_delete(chat_id, "Администратор снял ограничение", delay=MESSAGE_DELETE_SECONDS)
+            send_msg(message.from_user.id, f"✅ Ограничение снято с {user_id}")
+            send_and_delete(chat_id, "✅ Администратор снял ограничение с пользователя", delay=MESSAGE_DELETE_SECONDS)
         else:
-            send_msg(message.from_user.id, "Пользователь не ограничен")
+            send_msg(message.from_user.id, "❌ Пользователь не ограничен")
             
     except ValueError:
-        send_msg(message.from_user.id, "Неверный ID")
+        send_msg(message.from_user.id, "❌ Неверный ID")
 
 @bot.message_handler(commands=['set_delete_time'])
 def set_delete_cmd(message):
@@ -616,24 +798,24 @@ def set_delete_cmd(message):
         return
     parts = message.text.split()
     if len(parts) != 2:
-        send_msg(message.from_user.id, "/set_delete_time <секунды>")
+        send_msg(message.from_user.id, "❌ /set_delete_time <секунды>\n\nПример: /set_delete_time 30")
         return
     
     try:
         seconds = int(parts[1])
         if seconds < 5:
-            send_msg(message.from_user.id, "Минимум 5 секунд")
+            send_msg(message.from_user.id, "❌ Минимум 5 секунд")
             return
         if seconds > 300:
-            send_msg(message.from_user.id, "Максимум 300 секунд")
+            send_msg(message.from_user.id, "❌ Максимум 300 секунд (5 минут)")
             return
         
         global MESSAGE_DELETE_SECONDS
         MESSAGE_DELETE_SECONDS = seconds
-        send_msg(message.from_user.id, f"Время удаления: {seconds} секунд")
+        send_msg(message.from_user.id, f"✅ Время удаления установлено: {seconds} секунд")
         
     except ValueError:
-        send_msg(message.from_user.id, "Введите число")
+        send_msg(message.from_user.id, "❌ Введите число")
 
 @bot.message_handler(commands=['stats'])
 def stats_cmd(message):
@@ -642,48 +824,50 @@ def stats_cmd(message):
     chat_id = message.chat.id
     
     if chat_id not in chat_stats:
-        send_msg(message.from_user.id, "Нет статистики")
+        send_msg(message.from_user.id, "📊 Нет статистики для этого чата")
         return
     
     s = chat_stats[chat_id]
     d = s.get('daily', {})
     
-    send_msg(message.from_user.id, f"""Статистика чата
+    stats_text = f"""📊 <b>Статистика чата</b>
 
-Сегодня:
-Новых: {d.get('joins', 0)}
-Сообщений: {d.get('messages', 0)}
-Верификаций: {s.get('verifications', 0)}
+📅 <b>Сегодня:</b>
+├ 👥 Новых: {d.get('joins', 0)}
+├ 💬 Сообщений: {d.get('messages', 0)}
+└ ✅ Верификаций: {s.get('verifications', 0)}
 
-Всего:
-Участников: {s.get('joins', 0)}
-Сообщений: {s.get('messages', 0)}
-Верификаций: {s.get('verifications', 0)}
+📈 <b>Всего:</b>
+├ 👥 Участников: {s.get('joins', 0)}
+├ 💬 Сообщений: {s.get('messages', 0)}
+└ ✅ Верификаций: {s.get('verifications', 0)}
 
-На верификации: {len(verification_data)}
-Ограничено: {len(restricted_users)}
-Верифицировано: {len(verified_users)}""")
+⏳ На верификации: {len(verification_data)}
+🚫 Ограничено: {len(restricted_users)}
+✅ Верифицировано: {len(verified_users)}"""
+    
+    send_msg(message.from_user.id, stats_text)
 
 @bot.message_handler(commands=['stats_all'])
 def stats_all_cmd(message):
     if message.from_user.id not in authorized_users:
         return
     if not chat_stats:
-        send_msg(message.from_user.id, "Нет статистики")
+        send_msg(message.from_user.id, "📊 Нет статистики")
         return
     
     total_joins = sum(s.get('joins', 0) for s in chat_stats.values())
     total_messages = sum(s.get('messages', 0) for s in chat_stats.values())
     total_verifications = sum(s.get('verifications', 0) for s in chat_stats.values())
     
-    text = f"""Общая статистика
+    text = f"""📊 <b>Общая статистика по всем чатам</b>
 
-Всего:
-Участников: {total_joins}
-Сообщений: {total_messages}
-Верификаций: {total_verifications}
+📈 <b>Всего:</b>
+├ 👥 Участников: {total_joins}
+├ 💬 Сообщений: {total_messages}
+└ ✅ Верификаций: {total_verifications}
 
-По чатам:"""
+📋 <b>По чатам:</b>"""
     
     for cid, s in chat_stats.items():
         try:
@@ -691,7 +875,7 @@ def stats_all_cmd(message):
             name = chat.title if chat else "Чат"
         except:
             name = "Чат"
-        text += f"\n{name}:\n  Участников: {s.get('joins', 0)}\n  Сообщений: {s.get('messages', 0)}\n  Верификаций: {s.get('verifications', 0)}"
+        text += f"\n\n📌 {name}:\n  ├ 👥 {s.get('joins', 0)}\n  ├ 💬 {s.get('messages', 0)}\n  └ ✅ {s.get('verifications', 0)}"
     
     send_msg(message.from_user.id, text)
 
@@ -700,24 +884,31 @@ def status_cmd(message):
     if message.from_user.id not in authorized_users:
         return
     
-    send_msg(message.from_user.id, f"""Статус бота
+    status_text = f"""ℹ️ <b>Статус бота</b>
 
-Слов: {len(FORBIDDEN_WORDS)}
-Админов: {len(authorized_users)}
-На верификации: {len(verification_data)}
-Ограничено: {len(restricted_users)}
-Верифицировано: {len(verified_users)}
-Чатов: {len(chat_stats)}
-Таймаут: {VERIFICATION_TIMEOUT} сек
-Удаление: {MESSAGE_DELETE_SECONDS} сек
-Вопросов: {len(VERIFICATION_QUESTIONS)}""")
+📋 <b>Информация:</b>
+├ 📝 Слов в фильтре: {len(FORBIDDEN_WORDS)}
+├ 👥 Админов: {len(authorized_users)}
+├ ⏳ На верификации: {len(verification_data)}
+├ 🚫 Ограничено: {len(restricted_users)}
+├ ✅ Верифицировано: {len(verified_users)}
+├ 📊 Чатов: {len(chat_stats)}
+├ ⏱ Таймаут верификации: {VERIFICATION_TIMEOUT} сек
+├ 🗑 Время удаления: {MESSAGE_DELETE_SECONDS} сек
+└ 📝 Вопросов в базе: {len(VERIFICATION_QUESTIONS)}
+
+🟢 <b>Статус:</b> ✅ Работает
+
+🤖 <b>Бот:</b> @{bot.get_me().username}"""
+    
+    send_msg(message.from_user.id, status_text)
 
 @bot.message_handler(commands=['send_stats'])
 def send_stats_cmd(message):
     if message.from_user.id not in authorized_users:
         return
     send_daily_stats()
-    send_msg(message.from_user.id, "Статистика отправлена!")
+    send_msg(message.from_user.id, "📊 Статистика отправлена администратору!")
 
 # ============================================================
 # АДМИН-КОМАНДЫ
@@ -732,11 +923,11 @@ def handle_admin_commands(message):
             try:
                 new_id = int(parts[2])
                 authorized_users[new_id] = True
-                send_msg(user_id, f"Админ {new_id} добавлен")
+                send_msg(user_id, f"✅ Админ {new_id} добавлен")
             except ValueError:
-                send_msg(user_id, "Неверный ID")
+                send_msg(user_id, "❌ Неверный ID")
         else:
-            send_msg(user_id, "/add_admin <пароль> <id>")
+            send_msg(user_id, "❌ /add_admin <пароль> <id>")
     
     elif text.startswith('/remove_admin'):
         parts = text.split()
@@ -744,20 +935,16 @@ def handle_admin_commands(message):
             try:
                 rid = int(parts[1])
                 if rid == ADMIN_ID:
-                    send_msg(user_id, "Нельзя удалить главного")
+                    send_msg(user_id, "❌ Нельзя удалить главного администратора")
                 elif rid in authorized_users:
                     del authorized_users[rid]
-                    send_msg(user_id, f"Админ {rid} удален")
+                    send_msg(user_id, f"✅ Админ {rid} удален")
                 else:
-                    send_msg(user_id, "Админ не найден")
+                    send_msg(user_id, "❌ Админ не найден")
             except ValueError:
-                send_msg(user_id, "Неверный ID")
+                send_msg(user_id, "❌ Неверный ID")
         else:
-            send_msg(user_id, "/remove_admin <id>")
-    
-    elif text == '/list_admins':
-        admin_list = "\n".join([str(u) for u in authorized_users])
-        send_msg(user_id, f"Админы:\n{admin_list}")
+            send_msg(user_id, "❌ /remove_admin <id>")
     
     elif text.startswith('/add_word'):
         parts = text.split(maxsplit=1)
@@ -765,11 +952,11 @@ def handle_admin_commands(message):
             word = clean_text(parts[1])
             if word and word not in FORBIDDEN_WORDS:
                 FORBIDDEN_WORDS.append(word)
-                send_msg(user_id, f"Слово '{word}' добавлено")
+                send_msg(user_id, f"✅ Слово '{word}' добавлено в фильтр")
             else:
-                send_msg(user_id, "Слово уже есть или пусто")
+                send_msg(user_id, "❌ Слово уже есть или пусто")
         else:
-            send_msg(user_id, "/add_word <слово>")
+            send_msg(user_id, "❌ /add_word <слово>")
     
     elif text.startswith('/remove_word'):
         parts = text.split(maxsplit=1)
@@ -777,15 +964,11 @@ def handle_admin_commands(message):
             word = clean_text(parts[1])
             if word in FORBIDDEN_WORDS:
                 FORBIDDEN_WORDS.remove(word)
-                send_msg(user_id, f"Слово '{word}' удалено")
+                send_msg(user_id, f"✅ Слово '{word}' удалено из фильтра")
             else:
-                send_msg(user_id, "Слово не найдено")
+                send_msg(user_id, "❌ Слово не найдено")
         else:
-            send_msg(user_id, "/remove_word <слово>")
-    
-    elif text == '/list_words':
-        word_list = "\n".join(FORBIDDEN_WORDS)
-        send_msg(user_id, f"Список слов:\n{word_list}")
+            send_msg(user_id, "❌ /remove_word <слово>")
     
     elif text.startswith('/check_text'):
         parts = text.split(maxsplit=1)
@@ -793,14 +976,14 @@ def handle_admin_commands(message):
             cleaned = clean_text(parts[1])
             found = [w for w in FORBIDDEN_WORDS if w in cleaned]
             if found:
-                send_msg(user_id, f"Найдены: {', '.join(found)}")
+                send_msg(user_id, f"🔍 Найдены запрещенные слова: {', '.join(found)}")
             else:
-                send_msg(user_id, "Чисто")
+                send_msg(user_id, "✅ Текст чист. Запрещенных слов нет.")
         else:
-            send_msg(user_id, "/check_text <текст>")
+            send_msg(user_id, "❌ /check_text <текст>")
     
     else:
-        send_msg(user_id, "Неизвестная команда. /help")
+        send_msg(user_id, "❓ Неизвестная команда. Используйте /help")
 
 # ============================================================
 # ФОНОВЫЕ ЗАДАЧИ
@@ -832,17 +1015,19 @@ def send_daily_stats():
             except:
                 name = "Чат"
             
-            report = f"""Дневная статистика
-Чат: {name}
-Дата: {today}
+            report = f"""📊 <b>Дневная статистика</b>
 
-Новых: {d.get('joins', 0)}
-Сообщений: {d.get('messages', 0)}
-Верификаций: {s.get('verifications', 0)}
+🏷 <b>Чат:</b> {name}
+📅 <b>Дата:</b> {today}
 
-Всего участников: {s.get('joins', 0)}
-Всего сообщений: {s.get('messages', 0)}
-Всего верификаций: {s.get('verifications', 0)}"""
+👥 <b>Новых участников:</b> {d.get('joins', 0)}
+💬 <b>Сообщений:</b> {d.get('messages', 0)}
+✅ <b>Верификаций:</b> {s.get('verifications', 0)}
+
+📈 <b>Общая статистика:</b>
+├ 👥 Всего участников: {s.get('joins', 0)}
+├ 💬 Всего сообщений: {s.get('messages', 0)}
+└ ✅ Всего верификаций: {s.get('verifications', 0)}"""
             
             send_msg(ADMIN_ID, report)
 
@@ -851,16 +1036,27 @@ def send_daily_stats():
 # ============================================================
 if __name__ == "__main__":
     try:
-        send_msg(ADMIN_ID, "Бот запущен! Все сообщения без HTML. /start")
+        send_msg(ADMIN_ID, """🚀 <b>Бот запущен!</b>
+
+✅ Все системы работают
+🔐 Верификация активна
+🔄 Поддержка повторных входов
+🛡 Защита от API ограничений
+📊 Сбор статистики активен
+📝 {len(FORBIDDEN_WORDS)} слов в фильтре
+
+💡 Используйте /start в ЛС для управления""")
     except:
         pass
     
     print("=" * 50)
-    print("БОТ ЗАПУЩЕН!")
+    print("🚀 БОТ ЗАПУЩЕН!")
     print("=" * 50)
+    print(f"✅ {len(FORBIDDEN_WORDS)} слов в фильтре")
     print("✅ ВСЕ сообщения отправляются через send_msg()")
     print("✅ НИКАКОГО HTML и parse_mode")
     print("✅ Защита от ошибок 400, 429, 502")
+    print("✅ Красивый интерфейс с эмодзи")
     print("=" * 50)
     
     cleanup_thread = threading.Thread(target=cleanup_loop, daemon=True)
